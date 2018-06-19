@@ -137,7 +137,7 @@ rocblas_status rocblas_trtri(rocblas_handle handle, rocblas_fill uplo,
     return rocblas_strtri(handle, uplo, diag, n, A, lda, invA, ldinvA);
 }
 
-template <typename T>
+template <>
 rocblas_status rocblas_trtri(rocblas_handle handle, rocblas_fill uplo,
                              rocblas_diagonal diag, rocblas_int n, double *A,
                              rocblas_int lda, double *invA, rocblas_int ldinvA){
