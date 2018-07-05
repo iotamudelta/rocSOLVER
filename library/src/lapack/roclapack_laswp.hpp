@@ -10,6 +10,7 @@
 #define ROCLAPACK_LASWP_HPP
 
 #include "ideal_sizes.hpp"
+#include "rocsolver-types.h"
 #include <hip/hip_runtime.h>
 
 using namespace std;
@@ -36,7 +37,7 @@ __global__ void laswp_external(const rocblas_int n, T *a, const rocblas_int lda,
  *  Arguments
  *  =========
  *
- *  handle  (input) rocblas_handle
+ *  handle  (input) rocsolver_handle
  *
  *  n       (input) rocblas_int
  *          The number of columns of the matrix A.
@@ -73,7 +74,7 @@ __global__ void laswp_external(const rocblas_int n, T *a, const rocblas_int lda,
  *
  */
 template <typename T>
-void roclapack_laswp_template(rocblas_handle handle, rocblas_int n, T *A,
+void roclapack_laswp_template(rocsolver_handle handle, rocblas_int n, T *A,
                               rocblas_int lda, rocblas_int k1, rocblas_int k2,
                               const rocblas_int *ipiv, rocblas_int incx) {
 
@@ -114,7 +115,7 @@ void roclapack_laswp_template(rocblas_handle handle, rocblas_int n, T *A,
   dim3 threads(LASWP_BLOCKSIZE, 1, 1);
 
   hipStream_t stream;
-  rocblas_get_stream(handle, &stream);
+  rocblas_get_stream(handle->handle, &stream);
 
   for (rocblas_int i = start; i != end; i += incx) {
 

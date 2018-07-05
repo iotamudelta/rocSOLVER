@@ -44,7 +44,7 @@ template <typename T> __global__ void sqrtDiagOnward(T *a, size_t loc, T *res) {
 }
 
 template <typename T>
-rocblas_status rocsolver_potf2_template(rocblas_handle handle,
+rocblas_status rocsolver_potf2_template(rocsolver_handle handle,
                                         rocblas_fill uplo, rocblas_int n, T *a,
                                         rocblas_int lda) {
 
@@ -72,7 +72,7 @@ rocblas_status rocsolver_potf2_template(rocblas_handle handle,
   hipMemcpy(inpsResGPU, &inpsResHost[0], 5 * sizeof(T), hipMemcpyHostToDevice);
 
   hipStream_t stream;
-  rocblas_get_stream(handle, &stream);
+  rocblas_get_stream(handle->handle, &stream);
 
   // in order to get the indices right, we check what the fill mode is
   if (uplo == rocblas_fill_upper) {
@@ -82,7 +82,7 @@ rocblas_status rocsolver_potf2_template(rocblas_handle handle,
     for (rocblas_int j = 0; j < n; ++j) {
       // Compute U(J,J) and test for non-positive-definiteness.
       if (j > 0) {
-        rocblas_dot<T>(handle, j, &a[idx2D(0, j, lda)], oneInt,
+        rocblas_dot<T>(handle->handle, j, &a[idx2D(0, j, lda)], oneInt,
                        &a[idx2D(0, j, lda)], oneInt, &inpsResGPU[POTF2_RESDOT]);
         hipLaunchKernelGGL(sqrtDiagOnward<T>, dim3(1), dim3(1), 0, stream, a,
                            idx2D(j, j, lda), inpsResGPU);
@@ -94,12 +94,12 @@ rocblas_status rocsolver_potf2_template(rocblas_handle handle,
       // Compute elements J+1:N of row J
 
       if (j < n - 1) {
-        rocblas_gemv<T>(handle, rocblas_operation_transpose, j, n - j - 1,
-                        &(inpsResGPU[POTF2_INPMINONE]),
+        rocblas_gemv<T>(handle->handle, rocblas_operation_transpose, j,
+                        n - j - 1, &(inpsResGPU[POTF2_INPMINONE]),
                         &a[idx2D(0, j + 1, lda)], lda, &a[idx2D(0, j, lda)],
                         oneInt, &(inpsResGPU[POTF2_INPONE]),
                         &a[idx2D(j, j + 1, lda)], lda);
-        rocblas_scal<T>(handle, n - j - 1, &inpsResGPU[POTF2_RESINVDOT],
+        rocblas_scal<T>(handle->handle, n - j - 1, &inpsResGPU[POTF2_RESINVDOT],
                         &a[idx2D(j, j + 1, lda)], lda);
       }
     }
@@ -110,7 +110,7 @@ rocblas_status rocsolver_potf2_template(rocblas_handle handle,
     for (rocblas_int j = 0; j < n; ++j) {
       // Compute L(J,J) and test for non-positive-definiteness.
       if (j > 0) {
-        rocblas_dot<T>(handle, j, &a[idx2D(j, 0, lda)], lda,
+        rocblas_dot<T>(handle->handle, j, &a[idx2D(j, 0, lda)], lda,
                        &a[idx2D(j, 0, lda)], lda, &inpsResGPU[POTF2_RESDOT]);
         hipLaunchKernelGGL(sqrtDiagOnward<T>, dim3(1), dim3(1), 0, stream, a,
                            idx2D(j, j, lda), inpsResGPU);
@@ -122,12 +122,12 @@ rocblas_status rocsolver_potf2_template(rocblas_handle handle,
       // Compute elements J+1:N of row J
 
       if (j < n - 1) {
-        rocblas_gemv<T>(handle, rocblas_operation_none, n - j - 1, j,
+        rocblas_gemv<T>(handle->handle, rocblas_operation_none, n - j - 1, j,
                         &(inpsResGPU[POTF2_INPMINONE]),
                         &a[idx2D(j + 1, 0, lda)], lda, &a[idx2D(j, 0, lda)],
                         lda, &(inpsResGPU[POTF2_INPONE]),
                         &a[idx2D(j + 1, j, lda)], oneInt);
-        rocblas_scal<T>(handle, n - j - 1, &inpsResGPU[POTF2_RESINVDOT],
+        rocblas_scal<T>(handle->handle, n - j - 1, &inpsResGPU[POTF2_RESINVDOT],
                         &a[idx2D(j + 1, j, lda)], oneInt);
       }
     }

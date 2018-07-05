@@ -59,7 +59,7 @@ __global__ void getf2_scal(rocblas_int n, const T *alpha, T *x) {
 }
 
 template <typename T>
-rocblas_status rocsolver_getf2_template(rocblas_handle handle, rocblas_int m,
+rocblas_status rocsolver_getf2_template(rocsolver_handle handle, rocblas_int m,
                                         rocblas_int n, T *A, rocblas_int lda,
                                         rocblas_int *ipiv) {
 
@@ -89,7 +89,7 @@ rocblas_status rocsolver_getf2_template(rocblas_handle handle, rocblas_int m,
   hipMemcpy(inpsResGPU, &inpsResHost[0], 2 * sizeof(T), hipMemcpyHostToDevice);
 
   hipStream_t stream;
-  rocblas_get_stream(handle, &stream);
+  rocblas_get_stream(handle->handle, &stream);
 
   rocblas_int blocksPivot = (n - 1) / GETF2_BLOCKSIZE + 1;
   dim3 gridPivot(blocksPivot, 1, 1);
@@ -98,7 +98,7 @@ rocblas_status rocsolver_getf2_template(rocblas_handle handle, rocblas_int m,
   for (rocblas_int j = 0; j < min(m, n); ++j) {
 
     // find pivot and test for singularity
-    rocblas_iamax(handle, m - j, &A[idx2D(j, j, lda)], 1, &ipiv[j]);
+    rocblas_iamax(handle->handle, m - j, &A[idx2D(j, j, lda)], 1, &ipiv[j]);
 
     // use Fortran 1-based indexing for the ipiv array as iamax does that as
     // well!
@@ -119,9 +119,10 @@ rocblas_status rocsolver_getf2_template(rocblas_handle handle, rocblas_int m,
 
     if (j < min(m, n) - 1) {
       // update trailing submatrix
-      rocblas_ger(handle, m - j - 1, n - j - 1, &inpsResGPU[GETF2_INPMINONE],
-                  &A[idx2D(j + 1, j, lda)], oneInt, &A[idx2D(j, j + 1, lda)],
-                  lda, &A[idx2D(j + 1, j + 1, lda)], lda);
+      rocblas_ger(handle->handle, m - j - 1, n - j - 1,
+                  &inpsResGPU[GETF2_INPMINONE], &A[idx2D(j + 1, j, lda)],
+                  oneInt, &A[idx2D(j, j + 1, lda)], lda,
+                  &A[idx2D(j + 1, j + 1, lda)], lda);
     }
   }
 

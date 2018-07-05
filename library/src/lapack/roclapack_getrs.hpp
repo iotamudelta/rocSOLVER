@@ -20,7 +20,7 @@
 
 template <typename T>
 rocblas_status
-rocsolver_getrs_template(rocblas_handle handle, rocblas_operation trans,
+rocsolver_getrs_template(rocsolver_handle handle, rocblas_operation trans,
                          rocblas_int n, rocblas_int nrhs, const T *A,
                          rocblas_int lda, const rocblas_int *ipiv, T *B,
                          rocblas_int ldb) {
@@ -55,26 +55,26 @@ rocsolver_getrs_template(rocblas_handle handle, rocblas_operation trans,
     roclapack_laswp_template<T>(handle, nrhs, B, ldb, 1, n, ipiv, 1);
 
     // solve L*X - B, overwriting B with X
-    rocblas_trsm<T>(handle, rocblas_side_left, rocblas_fill_lower,
+    rocblas_trsm<T>(handle->handle, rocblas_side_left, rocblas_fill_lower,
                     rocblas_operation_none, rocblas_diagonal_unit, n, nrhs,
                     &inpsResGPU[GETRS_INPONE], const_cast<T *>(A), lda, B, ldb);
 
     // solve U*X = B, overwriting B with X
-    rocblas_trsm<T>(handle, rocblas_side_left, rocblas_fill_upper,
+    rocblas_trsm<T>(handle->handle, rocblas_side_left, rocblas_fill_upper,
                     rocblas_operation_none, rocblas_diagonal_non_unit, n, nrhs,
                     &inpsResGPU[GETRS_INPONE], const_cast<T *>(A), lda, B, ldb);
   } else {
 
     // solve A**T * X = B  or A**H * X = B
     // solve U**T *X = B or U**H *X = B, overwriting B with X
-    rocblas_trsm<T>(handle, rocblas_side_left, rocblas_fill_upper, trans,
-                    rocblas_diagonal_non_unit, n, nrhs,
+    rocblas_trsm<T>(handle->handle, rocblas_side_left, rocblas_fill_upper,
+                    trans, rocblas_diagonal_non_unit, n, nrhs,
                     &inpsResGPU[GETRS_INPONE], const_cast<T *>(A), lda, B, ldb);
 
     // solve L**T *X = B, or L**H *X = B overwriting B with X
-    rocblas_trsm<T>(handle, rocblas_side_left, rocblas_fill_lower, trans,
-                    rocblas_diagonal_unit, n, nrhs, &inpsResGPU[GETRS_INPONE],
-                    const_cast<T *>(A), lda, B, ldb);
+    rocblas_trsm<T>(handle->handle, rocblas_side_left, rocblas_fill_lower,
+                    trans, rocblas_diagonal_unit, n, nrhs,
+                    &inpsResGPU[GETRS_INPONE], const_cast<T *>(A), lda, B, ldb);
 
     // apply row interchanges to the solution vectors
     roclapack_laswp_template<T>(handle, nrhs, B, ldb, 1, n, ipiv, -1);

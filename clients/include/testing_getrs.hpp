@@ -52,7 +52,7 @@ template <typename T> rocblas_status testing_getrs(Arguments argus) {
 
   std::unique_ptr<rocblas_test::handle_struct> unique_ptr_handle(
       new rocblas_test::handle_struct);
-  rocblas_handle handle = unique_ptr_handle->handle;
+  rocsolver_handle handle = unique_ptr_handle->handle;
 
   // check here to prevent undefined memory allocation error
   if (M < 0 || nhrs < 0 || lda < std::max(1, M) || ldb < std::max(1, M)) {

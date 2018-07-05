@@ -27,7 +27,7 @@ __global__ void getrf_indices(rocblas_int n, rocblas_int j, rocblas_int *ipiv) {
 }
 
 template <typename T>
-rocblas_status rocsolver_getrf_template(rocblas_handle handle, rocblas_int m,
+rocblas_status rocsolver_getrf_template(rocsolver_handle handle, rocblas_int m,
                                         rocblas_int n, T *A, rocblas_int lda,
                                         rocblas_int *ipiv) {
 
@@ -61,7 +61,7 @@ rocblas_status rocsolver_getrf_template(rocblas_handle handle, rocblas_int m,
   hipMemcpy(inpsResGPU, &inpsResHost[0], 2 * sizeof(T), hipMemcpyHostToDevice);
 
   hipStream_t stream;
-  rocblas_get_stream(handle, &stream);
+  rocblas_get_stream(handle->handle, &stream);
 
   for (rocblas_int j = 0; j < min(m, n); j += GETRF_GETF2_SWITCHSIZE) {
 
@@ -95,15 +95,16 @@ rocblas_status rocsolver_getrf_template(rocblas_handle handle, rocblas_int m,
         return rocblas_status_success;
 
       // compute block row of U
-      rocblas_trsm(
-          handle, rocblas_side_left, rocblas_fill_lower, rocblas_operation_none,
-          rocblas_diagonal_unit, jb, (n - j - jb), &inpsResGPU[GETRF_INPONE],
-          &A[idx2D(j, j, lda)], lda, &A[idx2D(j, j + jb - 1, lda)], lda);
+      rocblas_trsm(handle->handle, rocblas_side_left, rocblas_fill_lower,
+                   rocblas_operation_none, rocblas_diagonal_unit, jb,
+                   (n - j - jb), &inpsResGPU[GETRF_INPONE],
+                   &A[idx2D(j, j, lda)], lda, &A[idx2D(j, j + jb - 1, lda)],
+                   lda);
 
       if (j + jb < m) {
         // update trailing submatrix
         rocblas_gemm(
-            handle, rocblas_operation_none, rocblas_operation_none,
+            handle->handle, rocblas_operation_none, rocblas_operation_none,
             (m - j - jb), (n - j - jb), jb, &inpsResGPU[GETRF_INPMINONE],
             &A[idx2D(j + jb - 1, j, lda)], lda, &A[idx2D(j, j + jb - 1, lda)],
             lda, &inpsResGPU[GETRF_INPONE],

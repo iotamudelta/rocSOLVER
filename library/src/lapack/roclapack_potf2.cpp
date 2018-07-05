@@ -15,13 +15,13 @@
  */
 
 extern "C" ROCSOLVER_EXPORT rocblas_status
-rocsolver_spotf2(rocblas_handle handle, rocblas_fill uplo, rocblas_int n,
+rocsolver_spotf2(rocsolver_handle handle, rocblas_fill uplo, rocblas_int n,
                  float *A, rocblas_int lda) {
   return rocsolver_potf2_template<float>(handle, uplo, n, A, lda);
 }
 
 extern "C" ROCSOLVER_EXPORT rocblas_status
-rocsolver_dpotf2(rocblas_handle handle, rocblas_fill uplo, rocblas_int n,
+rocsolver_dpotf2(rocsolver_handle handle, rocblas_fill uplo, rocblas_int n,
                  double *A, rocblas_int lda) {
   return rocsolver_potf2_template<double>(handle, uplo, n, A, lda);
 }

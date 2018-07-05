@@ -9,6 +9,11 @@
 #include "rocsolver-types.h"
 #include <hip/hip_runtime_api.h>
 #include <rocblas.h>
+#ifdef __cplusplus
+#include <cstdlib>
+#else
+#include <stdlib.h>
+#endif
 
 /*!\file
  * \brief rocsolver-auxiliary.h provides auxilary functions in rocsolver
@@ -28,12 +33,15 @@ extern "C" {
 ROCSOLVER_EXPORT __inline rocsolver_status
 rocsolver_create_handle(rocsolver_handle *handle) {
 
-  const rocblas_status stat = rocblas_create_handle(handle);
+  *handle = (rocsolver_handle)calloc(1, sizeof(_rocsolver_handle));
+
+  const rocblas_status stat = rocblas_create_handle(&((*handle)->handle));
   if (stat != rocblas_status_success) {
     return stat;
   }
 
-  return rocblas_set_pointer_mode(*handle, rocblas_pointer_mode_device);
+  return rocblas_set_pointer_mode((*handle)->handle,
+                                  rocblas_pointer_mode_device);
 }
 
 /********************************************************************************
@@ -41,7 +49,13 @@ rocsolver_create_handle(rocsolver_handle *handle) {
  *******************************************************************************/
 ROCSOLVER_EXPORT __inline rocsolver_status
 rocsolver_destroy_handle(rocsolver_handle handle) {
-  return rocblas_destroy_handle(handle);
+  const rocblas_status stat = rocblas_destroy_handle(handle->handle);
+  if (stat != rocblas_status_success) {
+    return stat;
+  }
+  free(handle);
+
+  return rocblas_status_success;
 }
 
 /********************************************************************************
@@ -49,7 +63,7 @@ rocsolver_destroy_handle(rocsolver_handle handle) {
  *******************************************************************************/
 ROCSOLVER_EXPORT __inline rocsolver_status
 rocsolver_add_stream(rocsolver_handle handle, hipStream_t stream) {
-  return rocblas_add_stream(handle, stream);
+  return rocblas_add_stream(handle->handle, stream);
 }
 
 /********************************************************************************
@@ -57,7 +71,7 @@ rocsolver_add_stream(rocsolver_handle handle, hipStream_t stream) {
  *******************************************************************************/
 ROCSOLVER_EXPORT __inline rocsolver_status
 rocsolver_set_stream(rocsolver_handle handle, hipStream_t stream) {
-  return rocblas_set_stream(handle, stream);
+  return rocblas_set_stream(handle->handle, stream);
 }
 
 /********************************************************************************
@@ -65,7 +79,7 @@ rocsolver_set_stream(rocsolver_handle handle, hipStream_t stream) {
  *******************************************************************************/
 ROCSOLVER_EXPORT __inline rocsolver_status
 rocsolver_get_stream(rocsolver_handle handle, hipStream_t *stream) {
-  return rocblas_get_stream(handle, stream);
+  return rocblas_get_stream(handle->handle, stream);
 }
 
 /********************************************************************************

@@ -24,7 +24,7 @@ static void *device_malloc(size_t byte_size) {
 static void device_free(void *ptr) { PRINT_IF_HIP_ERROR(hipFree(ptr)); }
 
 struct handle_struct {
-  rocblas_handle handle;
+  rocsolver_handle handle;
   handle_struct() { rocsolver_create_handle(&handle); }
 
   ~handle_struct() { rocsolver_destroy_handle(handle); }

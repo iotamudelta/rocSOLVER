@@ -16,7 +16,6 @@ typedef rocblas_float_complex rocsolver_float_complex;
 typedef rocblas_double_complex rocsolver_double_complex;
 typedef rocblas_half rocsolver_half;
 typedef rocblas_half_complex rocsolver_half_complex;
-typedef rocblas_handle rocsolver_handle;
 typedef rocblas_operation rocsolver_operation;
 typedef rocblas_fill rocsolver_fill;
 typedef rocblas_diagonal rocsolver_diagonal;
@@ -24,5 +23,14 @@ typedef rocblas_side rocsolver_side;
 typedef rocblas_status rocsolver_status;
 typedef rocblas_precision rocsolver_precision;
 typedef rocblas_layer_mode rocsolver_layer_mode;
+
+struct _rocsolver_handle {
+  _rocsolver_handle();
+  ~_rocsolver_handle();
+
+  rocblas_handle handle;
+};
+
+typedef struct _rocsolver_handle *rocsolver_handle;
 
 #endif

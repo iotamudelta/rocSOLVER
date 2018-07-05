@@ -15,13 +15,13 @@
  */
 
 extern "C" ROCSOLVER_EXPORT rocblas_status
-rocsolver_sgetf2(rocblas_handle handle, rocblas_int m, rocblas_int n, float *A,
-                 rocblas_int lda, rocblas_int *ipiv) {
+rocsolver_sgetf2(rocsolver_handle handle, rocblas_int m, rocblas_int n,
+                 float *A, rocblas_int lda, rocblas_int *ipiv) {
   return rocsolver_getf2_template<float>(handle, m, n, A, lda, ipiv);
 }
 
 extern "C" ROCSOLVER_EXPORT rocblas_status
-rocsolver_dgetf2(rocblas_handle handle, rocblas_int m, rocblas_int n, double *A,
-                 rocblas_int lda, rocblas_int *ipiv) {
+rocsolver_dgetf2(rocsolver_handle handle, rocblas_int m, rocblas_int n,
+                 double *A, rocblas_int lda, rocblas_int *ipiv) {
   return rocsolver_getf2_template<double>(handle, m, n, A, lda, ipiv);
 }
